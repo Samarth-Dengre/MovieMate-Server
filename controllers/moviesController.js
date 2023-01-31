@@ -11,6 +11,7 @@ const genres = [
   "Sci-Fi",
   "Fantasy",
 ];
+
 // This function will fetch all the movies from the database and return them as a JSON response
 module.exports.getMovies = async (req, res) => {
   const connection = await mysql.createConnection({
@@ -92,6 +93,37 @@ module.exports.getMovie = async (req, res) => {
       status: 200,
       message: "Movie fetched successfully",
       movie: rows[0],
+    });
+  }
+};
+
+// This function is executed when user fetches their favorites
+module.exports.getFavoriteMovies = async (req, res) => {
+  try {
+    const connection = await mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      database: "moviemate",
+      password: "samarth@sql",
+    });
+
+    const ids = req.body.ids;
+
+    // If the ids array is not empty, then return a 200 status code and a message along with the movies
+    const [rows] = await connection.execute(
+      `SELECT id,movieName,image,imdb,genre,cast,length FROM movies WHERE id IN (${ids});`
+    );
+
+    return res.json({
+      status: 200,
+      message: "Movies fetched successfully",
+      movies: rows,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: 400,
+      message: "Internal server error",
     });
   }
 };
