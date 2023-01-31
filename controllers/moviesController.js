@@ -25,6 +25,9 @@ module.exports.getMovies = async (req, res) => {
     "SELECT id,movieName,image,imdb,genre,cast,length FROM movies;"
   );
 
+  // close the connection
+  await connection.end();
+  
   // If no movies are found, return a 400 status code and a message
   if (rows.length === 0) {
     return res.json({
@@ -60,6 +63,9 @@ module.exports.getMovie = async (req, res) => {
         `SELECT movies.id,movies.movieName,movies.image,movies.imdb,movies.genre,movies.cast,movies.length FROM ${id} JOIN movies on ${id}.id = movies.id;`
       );
 
+      // close the connection
+      await connection.end();
+
       if (rows.length === 0) {
         return res.json({
           status: 400,
@@ -79,6 +85,9 @@ module.exports.getMovie = async (req, res) => {
       "SELECT id,movieName,image,imdb,genre,cast,length,description,language,year,link FROM movies WHERE id = ?;",
       [id]
     );
+
+    // close the connection
+    await connection.end();
 
     // If the movie is not found, then return a 400 status code and a message
     if (rows.length === 0) {
@@ -113,6 +122,9 @@ module.exports.getFavoriteMovies = async (req, res) => {
     const [rows] = await connection.execute(
       `SELECT id,movieName,image,imdb,genre,cast,length FROM movies WHERE id IN (${ids});`
     );
+
+    // close the connection
+    connection.end();
 
     return res.json({
       status: 200,

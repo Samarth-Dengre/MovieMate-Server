@@ -1,4 +1,3 @@
-const mailjet = require("node-mailjet");
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -36,6 +35,9 @@ module.exports.signin = async (req, res) => {
     const [rows] = await connection.execute(
       `INSERT INTO users (id, name, email, password, favorites) VALUES('${userid}','${userName}','${email}','${passwordHash}','[]');`
     );
+
+    // close the connection
+    await connection.end();
 
     // Send a response to the client
     return res.json({
@@ -75,6 +77,9 @@ module.exports.login = async (req, res) => {
   const [rows] = await connection.execute(
     `SELECT name,password,id,favorites FROM users WHERE email='${email}';`
   );
+
+  // close the connection
+  connection.end();
 
   // Check if the user exists
   if (rows.length === 0) {
@@ -129,6 +134,9 @@ module.exports.addFavorite = async (req, res) => {
 
     // Check if the user exists
     if (rows.length === 0) {
+      // Close the connection
+      await connection.end();
+
       return res.json({
         status: 400,
         message: "Invalid Request",
@@ -144,6 +152,9 @@ module.exports.addFavorite = async (req, res) => {
           favorites.filter((movie) => movie !== movieId)
         )}' WHERE id='${id}';`
       );
+
+      // Close the connection
+      await connection.end();
 
       // Remove the movie from the favorites
       return res.json({
@@ -169,6 +180,9 @@ module.exports.addFavorite = async (req, res) => {
       )}' WHERE id='${id}';`
     );
 
+    // Close the connection
+    await connection.end();
+
     // Send a response to the client
     return res.json({
       status: 200,
@@ -180,6 +194,49 @@ module.exports.addFavorite = async (req, res) => {
         password,
         favorites,
       },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: 400,
+      message: "Invalid Request",
+    });
+  }
+};
+
+// This function is executed when the user deletes the account
+module.exports.deleteAccount = async (req, res) => {
+  try {
+    const { name, email, password, id } = req.body;
+
+    // Create a connection to the database
+    const connection = await mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      database: "moviemate",
+      password: "samarth@sql",
+    });
+
+    // Delete the user from the database
+    const [rows] = await connection.execute(
+      `DELETE FROM users WHERE id='${id}' AND email='${email}' AND password='${password}' AND name='${name}';`
+    );
+
+    // Check if the user exists
+    if (rows.affectedRows === 0) {
+      return res.json({
+        status: 400,
+        message: "Invalid Request",
+      });
+    }
+
+    // Close the connection
+    await connection.end();
+
+    // Send a response to the client
+    return res.json({
+      status: 200,
+      message: "Account deleted successfully",
     });
   } catch (error) {
     console.log(error);
