@@ -14,10 +14,10 @@ module.exports.signin = async (req, res) => {
       user: process.env.USER,
       database: process.env.DATABASE,
       password: process.env.PASSWORD,
-      // ssl: {
-      //   rejectUnauthorized: true,
-      //   ca: fs.readFileSync("E:\\cacert.pem"),
-      // },
+      ssl: {
+        rejectUnauthorized: true,
+        // ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Check if the user already exists
@@ -75,10 +75,10 @@ module.exports.login = async (req, res) => {
     user: process.env.USER,
     database: process.env.DATABASE,
     password: process.env.PASSWORD,
-    // ssl: {
-    //   rejectUnauthorized: true,
-    //   ca: fs.readFileSync("E:\\cacert.pem"),
-    // },
+    ssl: {
+      rejectUnauthorized: true,
+      // ca: fs.readFileSync("E:\\cacert.pem"),
+    },
   });
 
   // const connection = await mysql.createConnection(process.env.DATABASE_URL);
@@ -135,10 +135,10 @@ module.exports.addFavorite = async (req, res) => {
       user: process.env.USER,
       database: process.env.DATABASE,
       password: process.env.PASSWORD,
-      // ssl: {
-      //   rejectUnauthorized: true,
-      //   ca: fs.readFileSync("E:\\cacert.pem"),
-      // },
+      ssl: {
+        rejectUnauthorized: true,
+        // ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Get the user from the database
@@ -229,10 +229,10 @@ module.exports.deleteAccount = async (req, res) => {
       user: process.env.USER,
       database: process.env.DATABASE,
       password: process.env.PASSWORD,
-      // ssl: {
-      //   rejectUnauthorized: true,
-      //   ca: fs.readFileSync("E:\\cacert.pem"),
-      // },
+      ssl: {
+        rejectUnauthorized: true,
+        // ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Delete the user from the database
