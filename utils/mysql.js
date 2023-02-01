@@ -1,15 +1,16 @@
 const mysql = require("mysql2/promise");
+const getConnection = async () => {
+  const connection = await mysql.createConnection({
+    host: process.env.HOST,
+    user: process.env.USER,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    ssl: {
+      rejectUnauthorized: true,
+    },
+  });
 
-async function createConnection() {
-  try {
-    return await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      database: "moviemate",
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
+  return connection;
+};
 
-module.exports = createConnection;
+module.exports = getConnection;

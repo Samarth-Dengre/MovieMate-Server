@@ -1,6 +1,6 @@
 const mysql = require("mysql2/promise");
+const getConnection = require("../utils/mysql");
 require("dotenv").config();
-const fs = require("fs");
 
 // This array contains all the genres of movies
 const genres = [
@@ -17,19 +17,10 @@ const genres = [
 // This function will fetch all the movies from the database and return them as a JSON response
 module.exports.getMovies = async (req, res) => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        // ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    // connect to the database
+    const connection = await getConnection();
 
-    // const connection = await mysql.createConnection(process.env.DATABASE_URL);
-
+    // fetch all the movies from the database
     const [rows] = await connection.execute(
       "SELECT id,movieName,image,imdb,genre,actors,length FROM movies;"
     );
@@ -62,16 +53,8 @@ module.exports.getMovies = async (req, res) => {
 
 // This function will fetch a single movie which is requested by the user from the database and return it as a JSON response
 module.exports.getMovie = async (req, res) => {
-  const connection = await mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    database: process.env.DATABASE,
-    password: process.env.PASSWORD,
-    ssl: {
-      rejectUnauthorized: true,
-      // ca: fs.readFileSync("E:\\cacert.pem"),
-    },
-  });
+  // connect to the database
+  const connection = await getConnection();
 
   const id = req.params.id;
 
@@ -133,16 +116,8 @@ module.exports.getMovie = async (req, res) => {
 // This function is executed when user fetches their favorites
 module.exports.getFavoriteMovies = async (req, res) => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        // ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    // connect to the database
+    const connection = await getConnection();
 
     const ids = req.body.ids;
 

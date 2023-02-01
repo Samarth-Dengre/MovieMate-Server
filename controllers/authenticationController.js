@@ -1,7 +1,8 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const fs = require("fs");
+const getConnection = require("../utils/mysql");
+
 // This function is executed when the user signing up
 module.exports.signin = async (req, res) => {
   try {
@@ -9,16 +10,7 @@ module.exports.signin = async (req, res) => {
     const userid = Date.now().toString() + Math.random().toString(); // Generate a unique id for the user
 
     // Create a connection to the database
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        // ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    const connection = await getConnection();
 
     // Check if the user already exists
     const [user] = await connection.execute(
@@ -70,18 +62,7 @@ module.exports.login = async (req, res) => {
   const password = req.query.password;
 
   // Create a connection to the database
-  const connection = await mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    database: process.env.DATABASE,
-    password: process.env.PASSWORD,
-    ssl: {
-      rejectUnauthorized: true,
-      // ca: fs.readFileSync("E:\\cacert.pem"),
-    },
-  });
-
-  // const connection = await mysql.createConnection(process.env.DATABASE_URL);
+  const connection = await getConnection();
 
   // Get the user from the database
   const [rows] = await connection.execute(
@@ -129,17 +110,7 @@ module.exports.addFavorite = async (req, res) => {
   const { email, name, password, id } = req.body.user;
 
   try {
-    // Create a connection to the database
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        // ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    const connection = await getConnection();
 
     // Get the user from the database
     const [rows] = await connection.execute(
@@ -224,16 +195,7 @@ module.exports.deleteAccount = async (req, res) => {
     const { name, email, password, id } = req.body;
 
     // Create a connection to the database
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        // ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    const connection = await getConnection();
 
     // Delete the user from the database
     const [rows] = await connection.execute(
