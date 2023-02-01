@@ -17,16 +17,18 @@ const genres = [
 // This function will fetch all the movies from the database and return them as a JSON response
 module.exports.getMovies = async (req, res) => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.HOST,
-      user: process.env.USER,
-      database: process.env.DATABASE,
-      password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        ca: fs.readFileSync("E:\\cacert.pem"),
-      },
-    });
+    // const connection = await mysql.createConnection({
+    //   host: process.env.HOST,
+    //   user: process.env.USER,
+    //   database: process.env.DATABASE,
+    //   password: process.env.PASSWORD,
+    //   ssl: {
+    //     rejectUnauthorized: true,
+    //     ca: fs.readFileSync("E:\\cacert.pem"),
+    //   },
+    // });
+
+    const connection = await mysql.createConnection(process.env.DATABASE_URL);
 
     const [rows] = await connection.execute(
       "SELECT id,movieName,image,imdb,genre,actors,length FROM movies;"
