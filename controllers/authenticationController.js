@@ -70,18 +70,18 @@ module.exports.login = async (req, res) => {
   const password = req.query.password;
 
   // Create a connection to the database
-  // const connection = await mysql.createConnection({
-  //   host: process.env.HOST,
-  //   user: process.env.USER,
-  //   database: process.env.DATABASE,
-  //   password: process.env.PASSWORD,
-  //   ssl: {
-  //     rejectUnauthorized: true,
-  //     ca: fs.readFileSync("E:\\cacert.pem"),
-  //   },
-  // });
+  const connection = await mysql.createConnection({
+    host: process.env.HOST,
+    user: process.env.USER,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    // ssl: {
+    //   rejectUnauthorized: true,
+    //   ca: fs.readFileSync("E:\\cacert.pem"),
+    // },
+  });
 
-  const connection = await mysql.createConnection(process.env.DATABASE_URL);
+  // const connection = await mysql.createConnection(process.env.DATABASE_URL);
 
   // Get the user from the database
   const [rows] = await connection.execute(
