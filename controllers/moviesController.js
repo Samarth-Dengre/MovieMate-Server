@@ -1,4 +1,6 @@
 const mysql = require("mysql2/promise");
+require("dotenv").config();
+const fs = require("fs");
 
 // This array contains all the genres of movies
 const genres = [
@@ -14,43 +16,59 @@ const genres = [
 
 // This function will fetch all the movies from the database and return them as a JSON response
 module.exports.getMovies = async (req, res) => {
-  const connection = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "moviemate",
-    password: "samarth@sql",
-  });
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.HOST,
+      user: process.env.USER,
+      database: process.env.DATABASE,
+      password: process.env.PASSWORD,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync("E:\\cacert.pem"),
+      },
+    });
 
-  const [rows] = await connection.execute(
-    "SELECT id,movieName,image,imdb,genre,cast,length FROM movies;"
-  );
+    const [rows] = await connection.execute(
+      "SELECT id,movieName,image,imdb,genre,actors,length FROM movies;"
+    );
 
-  // close the connection
-  await connection.end();
-  
-  // If no movies are found, return a 400 status code and a message
-  if (rows.length === 0) {
+    // close the connection
+    await connection.end();
+
+    // If no movies are found, return a 400 status code and a message
+    if (rows.length === 0) {
+      return res.json({
+        status: 400,
+        message: "Movies not found",
+      });
+    }
+
+    // If movies are found, return a 200 status code and a message along with the movies
+    return res.json({
+      status: 200,
+      message: "Movies fetched successfully",
+      movies: rows,
+    });
+  } catch (error) {
+    console.log(error);
     return res.json({
       status: 400,
       message: "Movies not found",
     });
   }
-
-  // If movies are found, return a 200 status code and a message along with the movies
-  return res.json({
-    status: 200,
-    message: "Movies fetched successfully",
-    movies: rows,
-  });
 };
 
 // This function will fetch a single movie which is requested by the user from the database and return it as a JSON response
 module.exports.getMovie = async (req, res) => {
   const connection = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "moviemate",
-    password: "samarth@sql",
+    host: process.env.HOST,
+    user: process.env.USER,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: fs.readFileSync("E:\\cacert.pem"),
+    },
   });
 
   const id = req.params.id;
@@ -60,7 +78,11 @@ module.exports.getMovie = async (req, res) => {
     // If the genre is not present in the genres array, then return a 400 status code and a message
     if (genres.includes(id)) {
       const [rows] = await connection.execute(
-        `SELECT movies.id,movies.movieName,movies.image,movies.imdb,movies.genre,movies.cast,movies.length FROM ${id} JOIN movies on ${id}.id = movies.id;`
+        `SELECT movies.id,movies.movieName,movies.image,movies.imdb,movies.genre,movies.actors,movies.length FROM ${
+          id === "Sci-Fi" ? "scifi" : id.toLowerCase()
+        } JOIN movies on ${
+          id === "Sci-Fi" ? "scifi" : id.toLowerCase()
+        }.id = movies.id;`
       );
 
       // close the connection
@@ -82,7 +104,7 @@ module.exports.getMovie = async (req, res) => {
   } else {
     // If the id is a number, then it is a movie id
     const [rows] = await connection.execute(
-      "SELECT id,movieName,image,imdb,genre,cast,length,description,language,year,link FROM movies WHERE id = ?;",
+      "SELECT id,movieName,image,imdb,genre,actors,length,description,language,year,link FROM movies WHERE id = ?;",
       [id]
     );
 
@@ -110,17 +132,21 @@ module.exports.getMovie = async (req, res) => {
 module.exports.getFavoriteMovies = async (req, res) => {
   try {
     const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      database: "moviemate",
-      password: "samarth@sql",
+      host: process.env.HOST,
+      user: process.env.USER,
+      database: process.env.DATABASE,
+      password: process.env.PASSWORD,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     const ids = req.body.ids;
 
     // If the ids array is not empty, then return a 200 status code and a message along with the movies
     const [rows] = await connection.execute(
-      `SELECT id,movieName,image,imdb,genre,cast,length FROM movies WHERE id IN (${ids});`
+      `SELECT id,movieName,image,imdb,genre,actors,length FROM movies WHERE id IN (${ids});`
     );
 
     // close the connection

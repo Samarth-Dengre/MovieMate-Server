@@ -1,7 +1,7 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-
+const fs = require("fs");
 // This function is executed when the user signing up
 module.exports.signin = async (req, res) => {
   try {
@@ -10,10 +10,14 @@ module.exports.signin = async (req, res) => {
 
     // Create a connection to the database
     const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      database: "moviemate",
-      password: "samarth@sql",
+      host: process.env.HOST,
+      user: process.env.USER,
+      database: process.env.DATABASE,
+      password: process.env.PASSWORD,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Check if the user already exists
@@ -67,10 +71,14 @@ module.exports.login = async (req, res) => {
 
   // Create a connection to the database
   const connection = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "moviemate",
-    password: "samarth@sql",
+    host: process.env.HOST,
+    user: process.env.USER,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: fs.readFileSync("E:\\cacert.pem"),
+    },
   });
 
   // Get the user from the database
@@ -121,10 +129,14 @@ module.exports.addFavorite = async (req, res) => {
   try {
     // Create a connection to the database
     const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      database: "moviemate",
-      password: "samarth@sql",
+      host: process.env.HOST,
+      user: process.env.USER,
+      database: process.env.DATABASE,
+      password: process.env.PASSWORD,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Get the user from the database
@@ -211,10 +223,14 @@ module.exports.deleteAccount = async (req, res) => {
 
     // Create a connection to the database
     const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      database: "moviemate",
-      password: "samarth@sql",
+      host: process.env.HOST,
+      user: process.env.USER,
+      database: process.env.DATABASE,
+      password: process.env.PASSWORD,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: fs.readFileSync("E:\\cacert.pem"),
+      },
     });
 
     // Delete the user from the database
