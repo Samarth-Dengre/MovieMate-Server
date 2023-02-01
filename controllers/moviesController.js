@@ -67,10 +67,10 @@ module.exports.getMovie = async (req, res) => {
     user: process.env.USER,
     database: process.env.DATABASE,
     password: process.env.PASSWORD,
-    ssl: {
-      rejectUnauthorized: true,
-      ca: fs.readFileSync("E:\\cacert.pem"),
-    },
+    // ssl: {
+    //   rejectUnauthorized: true,
+    //   ca: fs.readFileSync("E:\\cacert.pem"),
+    // },
   });
 
   const id = req.params.id;
@@ -138,10 +138,10 @@ module.exports.getFavoriteMovies = async (req, res) => {
       user: process.env.USER,
       database: process.env.DATABASE,
       password: process.env.PASSWORD,
-      ssl: {
-        rejectUnauthorized: true,
-        ca: fs.readFileSync("E:\\cacert.pem"),
-      },
+      // ssl: {
+      //   rejectUnauthorized: true,
+      //   ca: fs.readFileSync("E:\\cacert.pem"),
+      // },
     });
 
     const ids = req.body.ids;
