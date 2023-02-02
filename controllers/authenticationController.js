@@ -331,14 +331,22 @@ module.exports.verifyEmail = async (req, res) => {
 
 // This function is executed to delete the old OTP;s from the database
 module.exports.deleteOtp = async () => {
-  // Create a connection to the database
-  const connection = await getConnection();
+  try {
+    // Create a connection to the database
+    const connection = await getConnection();
 
-  // Delete the old OTP's from the database
-  const [rows] = await connection.execute(
-    "DELETE FROM otp WHERE timestamp < NOW() - INTERVAL 1 HOUR;"
-  );
+    // Delete the old OTP's from the database
+    const [rows] = await connection.execute(
+      "DELETE FROM otp WHERE timestamp < NOW() - INTERVAL 1 HOUR;"
+    );
 
-  // Close the connection
-  await connection.end();
+    // Close the connection
+    await connection.end();
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: 400,
+      message: "Invalid Request",
+    });
+  }
 };
