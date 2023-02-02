@@ -2,12 +2,12 @@ const mysql = require("mysql2/promise");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const getConnection = require("../utils/mysql");
+const Mailjet = require("node-mailjet");
 
 // This function is executed when the user signing up
 module.exports.signin = async (req, res) => {
   try {
-    const { userName, email, password } = req.body;
-    const userid = Date.now().toString() + Math.random().toString(); // Generate a unique id for the user
+    const { userName, email, password, code } = req.body;
 
     // Create a connection to the database
     const connection = await getConnection();
@@ -23,6 +23,25 @@ module.exports.signin = async (req, res) => {
         message: "This email is already registered",
       });
     }
+
+    // verify the code sent to the user's email address
+    const [rows2] = await connection.execute(
+      `SELECT * FROM otp WHERE email='${email}' AND code='${code}';`
+    );
+
+    if (rows2.length === 0) {
+      return res.json({
+        status: 400,
+        message: "Invalid code",
+      });
+    }
+
+    // delete the code from the database
+    const [rows3] = await connection.execute(
+      `DELETE FROM otp WHERE email='${email}' AND code='${code}';`
+    );
+
+    const userid = Date.now().toString() + Math.random().toString(); // Generate a unique id for the user
 
     // hash the password
     const passwordHash = await bcrypt.hash(password, 10);
@@ -233,4 +252,93 @@ module.exports.deleteAccount = async (req, res) => {
       message: "Invalid Request",
     });
   }
+};
+
+// This function is executed when the the user send a request to verify the email
+module.exports.verifyEmail = async (req, res) => {
+  try {
+    const { email, userName } = req.body;
+
+    // check if the email is already registered
+    const connection = await getConnection();
+    const [rows] = await connection.execute(
+      `SELECT email FROM users WHERE email='${email}';`
+    );
+
+    if (rows.length !== 0) {
+      return res.json({
+        status: 400,
+        message: "Email already registered",
+      });
+    }
+
+    // create connection to mail server
+    const mailjet = await Mailjet.apiConnect(
+      process.env.PUBLIC_KEY,
+      process.env.SECRET_KEY
+    );
+
+    // create a random number of 6 digits
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+
+    const request = await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: {
+            Email: "teamsocialify@gmail.com",
+            Name: "MovieMate",
+          },
+          To: [
+            {
+              Email: email,
+              Name: userName,
+            },
+          ],
+          Subject: "Verify your email",
+          TextPart: "Verify your email",
+          HTMLPart: `<h3>Verify your email</h3><p>Enter the following code to verify your email: <b>${randomNumber}</b></p>`,
+        },
+      ],
+    });
+
+    // delete the previous code from the database if it exists
+    const [rows1] = await connection.execute("DELETE FROM otp WHERE email=?", [
+      email,
+    ]);
+
+    // add code and current DATETIME to the database to verify the email
+    const [rows2] = await connection.execute(
+      "INSERT INTO otp (email, code, timestamp) VALUES (?, ?, NOW());",
+      [email, randomNumber]
+    );
+
+    // close the connection
+    await connection.end();
+
+    // Send a response to the client
+    return res.json({
+      status: 200,
+      message: "Email sent successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.json({
+      status: 400,
+      message: "Invalid Request",
+    });
+  }
+};
+
+// This function is executed to delete the old OTP;s from the database
+module.exports.deleteOtp = async () => {
+  // Create a connection to the database
+  const connection = await getConnection();
+
+  // Delete the old OTP's from the database
+  const [rows] = await connection.execute(
+    "DELETE FROM otp WHERE timestamp < NOW() - INTERVAL 1 HOUR;"
+  );
+
+  // Close the connection
+  await connection.end();
 };

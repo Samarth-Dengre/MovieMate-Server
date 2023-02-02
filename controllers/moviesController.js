@@ -71,6 +71,7 @@ module.exports.getMovie = async (req, res) => {
           }.id = movies.id;`
         );
 
+        console.log(rows);
         // close the connection
         await connection.end();
 
