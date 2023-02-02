@@ -58,50 +58,58 @@ module.exports.signin = async (req, res) => {
 
 // This function is executed when the user logs in
 module.exports.login = async (req, res) => {
-  const email = req.query.email;
-  const password = req.query.password;
+  try {
+    const email = req.query.email;
+    const password = req.query.password;
 
-  // Create a connection to the database
-  const connection = await getConnection();
+    // Create a connection to the database
+    const connection = await getConnection();
 
-  // Get the user from the database
-  const [rows] = await connection.execute(
-    `SELECT name,password,id,favorites FROM users WHERE email='${email}';`
-  );
+    // Get the user from the database
+    const [rows] = await connection.execute(
+      `SELECT name,password,id,favorites FROM users WHERE email='${email}';`
+    );
 
-  // close the connection
-  connection.end();
+    // close the connection
+    connection.end();
 
-  // Check if the user exists
-  if (rows.length === 0) {
+    // Check if the user exists
+    if (rows.length === 0) {
+      return res.json({
+        status: 400,
+        message: "User does not exist",
+      });
+    }
+
+    // Check if the password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, rows[0].password);
+
+    if (!isPasswordCorrect) {
+      return res.json({
+        status: 400,
+        message: "Incorrect password",
+      });
+    }
+
+    // Send a response to the client
+    return res.json({
+      status: 200,
+      message: "User logged in successfully",
+      user: {
+        id: rows[0].id,
+        name: rows[0].name,
+        email,
+        password: rows[0].password,
+        favorites: rows[0].favorites,
+      },
+    });
+  } catch (error) {
+    console.log(error);
     return res.json({
       status: 400,
-      message: "User does not exist",
+      message: "Login failed",
     });
   }
-
-  // Check if the password is correct
-  const isPasswordCorrect = await bcrypt.compare(password, rows[0].password);
-
-  if (!isPasswordCorrect) {
-    return res.json({
-      status: 400,
-      message: "Incorrect password",
-    });
-  }
-
-  // Send a response to the client
-  return res.json({
-    status: 200,
-    message: "User logged in successfully",
-    user: {
-      id: rows[0].id,
-      name: rows[0].name,
-      email,
-      password: rows[0].password,
-      favorites: rows[0].favorites,
-    },
-  });
 };
 
 // This function is executed when the user adds a movie to the favorites
